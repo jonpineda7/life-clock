@@ -4,7 +4,7 @@
 Contador de vidas con control de **tiempo total por jugador** (estilo ajedrez) para partidas de Magic: The Gathering.
 
 ## Características
-- 2–4 jugadores
+- 2–4 jugadores 
 - Vidas configurables (20/30/40)
 - Minutos totales por jugador configurables
 - El tiempo **solo corre** para el jugador en turno
