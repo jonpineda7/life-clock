@@ -1,0 +1,16 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="refresh" content="0; url=/life-clock/" />
+    <meta charset="utf-8" />
+    <title>Redirect</title>
+  </head>
+  <body>
+    <p>Redirigiendo… <a href="/life-clock/">Ir a la app</a></p>
+    <script>
+      var segment = window.location.pathname.replace('/life-clock','');
+      window.location.replace('/life-clock/' + (segment || ''));
+    </script>
+  </body>
+</html>

@@ -7,11 +7,11 @@ import { msToClock } from './utils/time.js'
 
 const DEFAULT_SETTINGS = { playersCount: 2, startingLife: 40, minutesPerPlayer: 15 }
 
-function makePlayers(settings) {
+function makePlayers(settings, names = []) {
   const ms = settings.minutesPerPlayer * 60_000
   return Array.from({ length: settings.playersCount }).map((_, i) => ({
     id: i + 1,
-    name: `Jugador ${i + 1}`,
+    name: names[i] ? names[i] : `Jugador ${i + 1}`,
     life: settings.startingLife,
     timeMs: ms,
     out: false
@@ -60,7 +60,7 @@ export default function App() {
   function startFromSetup(newSettings) {
     const cfg = { ...DEFAULT_SETTINGS, ...newSettings }
     setSettings(cfg)
-    setPlayers(makePlayers(cfg))
+    setPlayers(makePlayers(cfg, newSettings.names || []))
     setActiveIndex(0)
     setIsRunning(false)
     setInSetup(false)

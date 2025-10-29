@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# life-clock
-contador de vidas mtg
-=======
 
 # Life Clock – MTG
 
@@ -26,4 +22,3 @@ npm run dev
 npm run build
 npm run preview
 ```
->>>>>>> dc7dc95 (feat: life-clock initial commit)
