@@ -20,16 +20,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+
+      - name: Clean previously committed node_modules
+        run: rm -rf node_modules
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
       - name: Build
         run: npm run build -- --base=/life-clock/
+
       - name: Disable Jekyll
         run: touch dist/.nojekyll
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
