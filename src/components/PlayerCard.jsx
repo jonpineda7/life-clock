@@ -1,43 +1,71 @@
+
 import React from 'react'
 import { msToClock } from '../utils/time.js'
 
-export default function PlayerCard({ player, isActive, onLife, onRename }) {
+function getRotation(slot) {
+  const rotations = [
+    'rotate(0deg)',
+    'rotate(90deg)',
+    'rotate(180deg)',
+    'rotate(270deg)',
+  ]
+  return rotations[slot % 4]
+}
+
+export default function PlayerCard({ player, isActive, onLife, onRename, tableMode = false, slot = 0 }) {
+  if (tableMode) {
+    return (
+      <div
+        className={`table-cell ${isActive ? 'ring-4 ring-sky-300/70 z-10' : ''}`}
+        style={{ transform: getRotation(slot) }}
+      >
+        <div className="table-cell-inner">
+          <div className="table-player-name">{player.name}</div>
+          <div className="table-life">{player.life}</div>
+          <div className="table-buttons">
+            <button onClick={() => onLife(player.id, -1)}>-</button>
+            <button onClick={() => onLife(player.id, +1)}>+</button>
+          </div>
+          <div className="table-time">{msToClock(player.timeMs)}</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className={`card flex flex-col gap-3 border w-full ${isActive ? 'border-blue-600 ring-2 ring-blue-200' : 'border-transparent'}`}>
-      <div className="flex items-center justify-between">
+    <div className={`card flex flex-col gap-3 border w-full ${isActive ? 'border-blue-400/80 ring-2 ring-blue-400/20' : 'border-transparent'}`}>
+      <div className="flex items-center justify-between gap-2">
         <input
           aria-label="Nombre del jugador"
           className="player-name-input text-lg font-bold bg-transparent outline-none w-full"
           value={player.name}
           onChange={(e) => onRename(player.id, e.target.value)}
         />
-        <span className={`player-status-pill ml-3 text-xs px-2 py-1 rounded-full ${isActive ? 'bg-blue-100 text-blue-700' : 'bg-zinc-100 text-zinc-600'}`}>
+        <span className={`player-status-pill rounded-full ${isActive ? 'bg-blue-100 text-blue-700' : 'bg-slate-100/10 text-slate-100/70'}`}>
           {isActive ? 'En turno' : 'En espera'}
         </span>
       </div>
 
       <div className="grid gap-3 items-center sm:grid-cols-2">
         <div className="flex flex-col items-start gap-2">
-          <div className="life-big text-4xl font-black tabular-nums">{player.life}</div>
-          <div className="life-btn-row flex gap-2">
+          <div className="life-big text-4xl font-black tabular-nums leading-none">{player.life}</div>
+          <div className="life-btn-row flex flex-wrap gap-2">
             <button className="btn-ghost" onClick={() => onLife(player.id, -5)}>-5</button>
             <button className="btn-ghost" onClick={() => onLife(player.id, -1)}>-1</button>
             <button className="btn-ghost" onClick={() => onLife(player.id, +1)}>+1</button>
             <button className="btn-ghost" onClick={() => onLife(player.id, +5)}>+5</button>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <div className={`time-big text-3xl font-extrabold tabular-nums ${player.timeMs <= 15000 ? 'text-red-600' : ''}`}>
+        <div className="flex flex-col items-end gap-1">
+          <div className={`time-big text-3xl font-extrabold tabular-nums ${player.timeMs <= 15000 ? 'text-red-400' : 'text-slate-50'}`}>
             {msToClock(player.timeMs)}
           </div>
-          <div className="text-xs text-zinc-500">
-            Tiempo total restante
-          </div>
+          <div className="text-xs text-slate-200/50">Tiempo total restante</div>
         </div>
       </div>
 
       {player.out && (
-        <div className="rounded-xl bg-red-50 text-red-700 text-sm px-3 py-2">
+        <div className="rounded-xl bg-red-500/10 text-red-200 text-sm px-3 py-2">
           Sin tiempo • Eliminado
         </div>
       )}

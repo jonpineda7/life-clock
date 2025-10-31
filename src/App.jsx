@@ -1,11 +1,11 @@
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import TopBar from './components/TopBar.jsx'
 import PlayerCard from './components/PlayerCard.jsx'
 import Setup from './components/Setup.jsx'
-import { msToClock } from './utils/time.js'
 
 const DEFAULT_SETTINGS = { playersCount: 2, startingLife: 40, minutesPerPlayer: 15 }
+const TABLE_MODE_KEY = 'life-clock:tableMode:preferred'
 
 function makePlayers(settings, names = []) {
   const ms = settings.minutesPerPlayer * 60_000
@@ -24,10 +24,20 @@ export default function App() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
   const [inSetup, setInSetup] = useState(true)
+  const [tableMode, setTableMode] = useState(false)
+
+  // load preference
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const saved = window.localStorage.getItem(TABLE_MODE_KEY)
+    if (saved === 'true') {
+      setTableMode(true)
+    }
+  }, [])
 
   const aliveCount = players.filter(p => !p.out).length
 
-  // Tick timer for active player
+  // tick timer
   useEffect(() => {
     if (!isRunning) return
     if (players[activeIndex]?.out) { nextTurn(); return }
@@ -48,7 +58,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRunning, activeIndex])
 
-  // Auto-pass if someone just ran out of time
+  // auto-pass if current died
   useEffect(() => {
     const p = players[activeIndex]
     if (p && p.out && isRunning) {
@@ -56,6 +66,21 @@ export default function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [players])
+
+  // auto-activate table mode on landscape IF user liked it before
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const saved = window.localStorage.getItem(TABLE_MODE_KEY)
+    if (!saved || saved !== 'true') return
+
+    function onResize() {
+      if (window.innerWidth > window.innerHeight) {
+        setTableMode(true)
+      }
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   function startFromSetup(newSettings) {
     const cfg = { ...DEFAULT_SETTINGS, ...newSettings }
@@ -80,12 +105,6 @@ export default function App() {
   }
 
   function nextTurn() {
-    setPlayers(prev => {
-      const next = [...prev]
-      // no mutation needed here
-      return next
-    })
-    // find next alive player
     setActiveIndex(i => {
       let idx = i
       for (let tries = 0; tries < players.length; tries++) {
@@ -100,6 +119,16 @@ export default function App() {
     setPlayers(makePlayers(settings))
     setActiveIndex(0)
     setIsRunning(false)
+  }
+
+  function toggleTableMode() {
+    setTableMode(v => {
+      const next = !v
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(TABLE_MODE_KEY, next ? 'true' : 'false')
+      }
+      return next
+    })
   }
 
   const winner = useMemo(() => {
@@ -119,34 +148,54 @@ export default function App() {
         isRunning={isRunning}
         onToggleRun={toggleRun}
         onPassTurn={nextTurn}
+        onToggleTableMode={toggleTableMode}
+        tableMode={tableMode}
       />
 
       {winner && (
-        <div className="my-4 p-4 rounded-2xl bg-emerald-50 text-emerald-800 font-semibold">
+        <div className="my-4 p-4 rounded-2xl bg-emerald-500/20 text-emerald-50 font-semibold border border-emerald-500/30">
           🏆 {winner.name} gana la partida
         </div>
       )}
 
-  <div className="mt-4 grid gap-4 md:grid-cols-2 players-grid">
-    {players.map((p, i) => (
-      <PlayerCard
-        key={p.id}
-        player={p}
-        isActive={!p.out && i === activeIndex && isRunning}
-        onLife={onLife}
-        onRename={onRename}
-      />
-    ))}
-  </div>
+      {tableMode ? (
+        <div className="table-grid mt-4">
+          {players.map((p, i) => (
+            <PlayerCard
+              key={p.id}
+              player={p}
+              isActive={!p.out && i === activeIndex && isRunning}
+              onLife={onLife}
+              onRename={onRename}
+              tableMode
+              slot={i}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="mt-4 grid gap-4 md:grid-cols-2 players-grid">
+          {players.map((p, i) => (
+            <PlayerCard
+              key={p.id}
+              player={p}
+              isActive={!p.out && i === activeIndex && isRunning}
+              onLife={onLife}
+              onRename={onRename}
+            />
+          ))}
+        </div>
+      )}
 
-      <div className="mt-6 grid gap-2">
-        <div className="text-sm text-zinc-600">
-          Turno actual: <span className="font-semibold">{players[activeIndex]?.name}</span>
+      {!tableMode && (
+        <div className="mt-6 grid gap-2">
+          <div className="text-sm text-slate-200/80">
+            Turno actual: <span className="font-semibold">{players[activeIndex]?.name}</span>
+          </div>
+          <div className="text-xs text-slate-200/50">
+            Consejo: toca <span className="font-mono">Iniciar</span> para que comience a correr el tiempo del jugador en turno. Usa <span className="font-mono">Pasar turno</span> para pausar ese reloj y activar el siguiente.
+          </div>
         </div>
-        <div className="text-xs text-zinc-500">
-          Consejo: toca <span className="font-mono">Iniciar</span> para que comience a correr el tiempo del jugador en turno. Usa <span className="font-mono">Pasar turno</span> para pausar ese reloj y activar el siguiente.
-        </div>
-      </div>
+      )}
     </div>
   )
 }

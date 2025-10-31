@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -16,46 +17,113 @@
   @apply rounded-2xl bg-white shadow p-4;
 }
 
+
+/* === MTG ambient theme === */
+body {
+  background: radial-gradient(circle at top, #0f172a 0%, #020617 45%, #000 100%);
+  color: #e2e8f0;
+  min-height: 100vh;
+}
+
+.mtg-topbar {
+  background: rgba(2, 6, 23, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+}
+
+.card {
+  border-radius: 1.25rem;
+  background: radial-gradient(circle, rgba(15,23,42,0.35) 0%, rgba(15,23,42,0.1) 65%, rgba(15,23,42,0.05) 100%);
+  border: 1px solid rgba(148,163,184,0.15);
+  box-shadow: 0 12px 20px rgba(0,0,0,0.25);
+}
+
+/* buttons */
+.btn-primary {
+  background: linear-gradient(120deg, #2563eb, #38bdf8);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+}
+.btn-primary:hover {
+  background: linear-gradient(120deg, #1d4ed8, #0ea5e9);
+}
+.btn-ghost {
+  background: rgba(15,23,42,0.4);
+  border: 1px solid rgba(148,163,184,0.15);
+  border-radius: 0.75rem;
+  padding: 0.45rem 0.9rem;
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
+/* table/board mode 2x2 */
+.table-grid {
+  width: 100%;
+  height: calc(100vh - 5.5rem);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 0.2rem;
+  background: #000;
+  border-radius: 1.25rem;
+  overflow: hidden;
+}
+.table-cell {
+  background: radial-gradient(circle at 15% 15%, #d1e9ff 0%, #9dafc7 50%, #5b6578 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-out;
+}
+.table-cell-inner {
+  width: 85%;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.table-player-name {
+  background: rgba(255,255,255,0.87);
+  color: #0f172a;
+  padding: 0.25rem 1rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+.table-life {
+  font-size: 3.6rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.table-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+.table-buttons button {
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.95);
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 1.15rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+.table-time {
+  font-size: 0.9rem;
+  color: rgba(15,23,42,0.8);
+  font-weight: 500;
+}
+
+/* compact mobile tweaks */
 @media (max-width: 640px) {
-  body {
-    background: #e4e4e7; /* un gris clarito */
-  }
-
-  .card {
-    padding: 0.9rem 0.9rem 0.7rem 0.9rem; /* menos padding */
-    border-radius: 1.1rem;
-    margin-inline: auto;
-    width: min(100%, 460px);
-  }
-
-  .player-name-input {
-    font-size: 1rem; /* antes 1.125rem aprox */
-  }
-
-  .life-big {
-    font-size: 2.4rem; /* antes 2.5-3rem */
-    line-height: 1;
-  }
-
-  .time-big {
-    font-size: 1.7rem;
-  }
-
-  .life-btn-row {
-    gap: 0.4rem;
-  }
-
-  .life-btn-row .btn-ghost {
-    min-width: 2.6rem;
-    padding: 0.35rem 0.5rem;
-  }
-
-  .player-status-pill {
-    font-size: 0.65rem;
-    padding: 0.35rem 0.7rem;
-  }
-
-  .players-grid {
-    gap: 0.6rem;
-  }
+  .players-grid { gap: 0.6rem; }
+  .card { padding: 0.75rem 0.9rem; }
+  .table-grid { height: calc(100vh - 4.5rem); }
 }
