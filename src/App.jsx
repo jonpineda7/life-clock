@@ -5,16 +5,18 @@ import PlayerCard from './components/PlayerCard.jsx'
 import Setup from './components/Setup.jsx'
 
 const DEFAULT_SETTINGS = { playersCount: 2, startingLife: 40, minutesPerPlayer: 15 }
+const COLORS = ['#0ea5e9', '#f43f5e', '#22c55e', '#6366f1']
 const TABLE_MODE_KEY = 'life-clock:tableMode:preferred'
 
-function makePlayers(settings, names = []) {
+function makePlayers(settings, names = [], colors = []) {
   const ms = settings.minutesPerPlayer * 60_000
   return Array.from({ length: settings.playersCount }).map((_, i) => ({
     id: i + 1,
     name: names[i] ? names[i] : `Jugador ${i + 1}`,
     life: settings.startingLife,
     timeMs: ms,
-    out: false
+    out: false,
+    color: colors[i] ? colors[i] : COLORS[i % COLORS.length],
   }))
 }
 
@@ -85,7 +87,7 @@ export default function App() {
   function startFromSetup(newSettings) {
     const cfg = { ...DEFAULT_SETTINGS, ...newSettings }
     setSettings(cfg)
-    setPlayers(makePlayers(cfg, newSettings.names || []))
+    setPlayers(makePlayers(cfg, newSettings.names || [], newSettings.colors || []))
     setActiveIndex(0)
     setIsRunning(false)
     setInSetup(false)
@@ -167,6 +169,7 @@ export default function App() {
               isActive={!p.out && i === activeIndex && isRunning}
               onLife={onLife}
               onRename={onRename}
+            color={p.color}
               tableMode
               slot={i}
             />
@@ -181,6 +184,7 @@ export default function App() {
               isActive={!p.out && i === activeIndex && isRunning}
               onLife={onLife}
               onRename={onRename}
+            color={p.color}
             />
           ))}
         </div>

@@ -1,75 +1,112 @@
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
+
+const COLORS = ['#0ea5e9', '#f43f5e', '#22c55e', '#6366f1']
 
 export default function Setup({ initial, onStart }) {
   const [playersCount, setPlayersCount] = useState(initial.playersCount)
   const [startingLife, setStartingLife] = useState(initial.startingLife)
   const [minutesPerPlayer, setMinutesPerPlayer] = useState(initial.minutesPerPlayer)
-  const [names, setNames] = useState(() => Array.from({ length: initial.playersCount }, (_, i) => `Jugador ${i + 1}`))
-
-  // Ajusta la cantidad de inputs de nombres según playersCount
-  useEffect(() => {
-    setNames(prev => {
-      const next = [...prev]
-      if (playersCount > next.length) {
-        for (let i = next.length; i < playersCount; i++) next.push(`Jugador ${i + 1}`)
-      } else if (playersCount < next.length) {
-        next.length = playersCount
-      }
-      return next
-    })
-  }, [playersCount])
-
-  function handleNameChange(index, value) {
-    setNames(prev => prev.map((n, i) => i === index ? value : n))
-  }
+  const [names, setNames] = useState(
+    Array.from({ length: 4 }).map((_, i) => `Jugador ${i + 1}`)
+  )
+  const [colors, setColors] = useState(
+    Array.from({ length: 4 }).map((_, i) => COLORS[i % COLORS.length])
+  )
 
   function handleSubmit(e) {
     e.preventDefault()
-    onStart({ playersCount, startingLife, minutesPerPlayer, names })
+    const payload = {
+      playersCount: Number(playersCount),
+      startingLife: Number(startingLife),
+      minutesPerPlayer: Number(minutesPerPlayer),
+      names: names.slice(0, playersCount),
+      colors: colors.slice(0, playersCount),
+    }
+    onStart(payload)
+  }
+
+  function updateName(i, value) {
+    setNames(prev => prev.map((n, idx) => (idx === i ? value : n)))
+  }
+
+  function updateColor(i, color) {
+    setColors(prev => prev.map((c, idx) => (idx === i ? color : c)))
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="card max-w-lg w-full">
-        <h2 className="text-xl font-extrabold mb-4">Configurar partida</h2>
-        <form onSubmit={handleSubmit} className="grid gap-4">
-          <label className="grid gap-1">
-            <span className="text-sm text-zinc-600">Cantidad de jugadores</span>
-            <select className="border rounded-xl px-3 py-2" value={playersCount} onChange={e=>setPlayersCount(parseInt(e.target.value))}>
-              {[2,3,4].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </label>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-lg bg-slate-900/40 border border-slate-200/5 rounded-3xl p-6 shadow-2xl backdrop-blur-md space-y-4"
+      >
+        <h2 className="text-2xl font-bold text-slate-100 mb-4">Configurar partida</h2>
 
-          <label className="grid gap-1">
-            <span className="text-sm text-zinc-600">Vidas iniciales</span>
-            <select className="border rounded-xl px-3 py-2" value={startingLife} onChange={e=>setStartingLife(parseInt(e.target.value))}>
-              {[20,30,40].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </label>
-
-          <label className="grid gap-1">
-            <span className="text-sm text-zinc-600">Minutos por jugador</span>
-            <input className="border rounded-xl px-3 py-2" type="number" min="1" max="90" value={minutesPerPlayer} onChange={e=>setMinutesPerPlayer(parseInt(e.target.value || 0))} />
-          </label>
-
-          <div className="grid gap-2 mt-2">
-            <span className="text-sm text-zinc-600">Nombres de jugadores</span>
-            {Array.from({ length: playersCount }).map((_, i) => (
-              <input
-                key={i}
-                className="border rounded-xl px-3 py-2"
-                aria-label={`Nombre del jugador ${i + 1}`}
-                value={names[i] ?? ''}
-                onChange={(e) => handleNameChange(i, e.target.value)}
-                placeholder={`Jugador ${i + 1}`}
-              />
+        <div className="space-y-1">
+          <label className="text-sm text-slate-200/80">Cantidad de jugadores</label>
+          <select
+            value={playersCount}
+            onChange={e => setPlayersCount(Number(e.target.value))}
+            className="w-full bg-slate-900/50 border border-slate-200/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          >
+            {[2,3,4].map(n => (
+              <option key={n} value={n}>{n}</option>
             ))}
-          </div>
+          </select>
+        </div>
 
-          <button className="btn-primary mt-2" type="submit">Comenzar</button>
-        </form>
-      </div>
+        <div className="space-y-1">
+          <label className="text-sm text-slate-200/80">Vidas iniciales</label>
+          <input
+            type="number"
+            value={startingLife}
+            onChange={e => setStartingLife(e.target.value)}
+            className="w-full bg-slate-900/50 border border-slate-200/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-sm text-slate-200/80">Minutos por jugador</label>
+          <input
+            type="number"
+            value={minutesPerPlayer}
+            onChange={e => setMinutesPerPlayer(e.target.value)}
+            className="w-full bg-slate-900/50 border border-slate-200/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          />
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-sm text-slate-200/70">Nombres y colores de jugadores</p>
+          {Array.from({ length: playersCount }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <input
+                value={names[i]}
+                onChange={e => updateName(i, e.target.value)}
+                className="flex-1 bg-slate-900/50 border border-slate-200/10 rounded-xl px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+              <div className="flex gap-2">
+                {COLORS.map(col => (
+                  <button
+                    key={col}
+                    type="button"
+                    onClick={() => updateColor(i, col)}
+                    className={`w-7 h-7 rounded-full border ${colors[i] === col ? 'ring-2 ring-white/80 border-white/80' : 'border-transparent'}`}
+                    style={{ background: col }}
+                    aria-label={`Color ${col}`}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-gradient-to-r from-sky-500 to-indigo-500 text-white py-2 rounded-xl font-semibold shadow-lg shadow-sky-500/30"
+        >
+          Comenzar
+        </button>
+      </form>
     </div>
   )
 }

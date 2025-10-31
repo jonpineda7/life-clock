@@ -12,7 +12,7 @@ function getRotation(slot) {
   return rotations[slot % 4]
 }
 
-export default function PlayerCard({ player, isActive, onLife, onRename, tableMode = false, slot = 0 }) {
+export default function PlayerCard({ player, isActive, onLife, onRename, tableMode = false, slot = 0, color }) {
   if (tableMode) {
     return (
       <div
