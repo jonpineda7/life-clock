@@ -3,7 +3,7 @@ import React from 'react'
 
 export default function TopBar({ settings, onReset, isRunning, onToggleRun, onPassTurn }) {
   return (
-    <div className="flex flex-wrap gap-2 items-center justify-between">
+    <div className="flex flex-wrap gap-2 items-center justify-between sm:flex-row flex-col">
       <div className="flex items-baseline gap-3">
         <h1 className="text-2xl font-black">Life Clock</h1>
         <div className="text-sm text-zinc-600">

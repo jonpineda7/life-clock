@@ -1,10 +1,9 @@
-
 import React from 'react'
 import { msToClock } from '../utils/time.js'
 
 export default function PlayerCard({ player, isActive, onLife, onRename }) {
   return (
-    <div className={`card flex flex-col gap-3 border ${isActive ? 'border-blue-600 ring-2 ring-blue-200' : 'border-transparent'}`}>
+    <div className={`card flex flex-col gap-3 border w-full ${isActive ? 'border-blue-600 ring-2 ring-blue-200' : 'border-transparent'}`}>
       <div className="flex items-center justify-between">
         <input
           aria-label="Nombre del jugador"
@@ -17,7 +16,7 @@ export default function PlayerCard({ player, isActive, onLife, onRename }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 items-center">
+      <div className="grid gap-3 items-center sm:grid-cols-2">
         <div className="flex flex-col items-start gap-2">
           <div className="text-4xl font-black tabular-nums">{player.life}</div>
           <div className="flex gap-2">

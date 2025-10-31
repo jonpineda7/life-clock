@@ -16,3 +16,21 @@
 .card {
   @apply rounded-2xl bg-white shadow p-4;
 }
+
+@media (max-width: 640px) {
+  body {
+    background: #e4e4e7; /* un gris clarito */
+  }
+
+  .card {
+    /* que no se pegue a los bordes */
+    margin-inline: auto;
+    width: min(100%, 460px);
+  }
+
+  /* botones de vida más grandes para el dedo */
+  .btn-ghost {
+    min-width: 2.8rem;
+    justify-content: center;
+  }
+}
