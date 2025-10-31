@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -62,102 +61,95 @@ body {
 
 /* table/board mode 2x2 */
 .table-grid {
-  width: 100%;
-  height: calc(100vh - 5.5rem);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: 0.2rem;
-  background: #000;
-  border-radius: 1.25rem;
-  overflow: hidden;
-}
-.table-cell {
-  background: radial-gradient(circle at 15% 15%, #d1e9ff 0%, #9dafc7 50%, #5b6578 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease-out;
-}
-.table-cell-inner {
-  width: 85%;
-  max-width: 240px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-.table-player-name {
-  background: rgba(255,255,255,0.87);
-  color: #0f172a;
-  padding: 0.25rem 1rem;
-  border-radius: 9999px;
-  font-weight: 600;
-}
-.table-life {
-  font-size: 3.6rem;
-  font-weight: 800;
-  line-height: 1;
-}
-.table-buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-.table-buttons button {
-  width: 2.3rem;
-  height: 2.3rem;
-  border-radius: 9999px;
-  background: rgba(255,255,255,0.95);
-  color: #0f172a;
-  font-weight: 600;
-  font-size: 1.15rem;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
-}
-.table-time {
-  font-size: 0.9rem;
-  color: rgba(15,23,42,0.8);
-  font-weight: 500;
-}
-
-/* compact mobile tweaks */
-@media (max-width: 640px) {
-  .players-grid { gap: 0.6rem; }
-  .card { padding: 0.75rem 0.9rem; }
-  .table-grid { height: calc(100vh - 4.5rem); }
-}
-
-
-/* mobile friendly table mode */
-.table-grid {
   width: 100vw;
-  height: 100svh;
+  height: 100svh; /* iPhone-friendly viewport */
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 0;
   background: #000;
   overflow: hidden;
+  border-radius: 1.25rem;
 }
+
+/* each quadrant */
 .table-cell {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
+
+/* inner content */
 .table-cell-inner {
   width: min(92%, 240px);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   align-items: center;
+  justify-content: center;
   text-align: center;
   color: #fff;
 }
+
+.table-player-name {
+  background: rgba(255,255,255,0.88);
+  color: #020617;
+  padding: 0.25rem 1.1rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.table-life {
+  font-size: clamp(3rem, 6.3vw, 4rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.table-buttons {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.table-buttons button {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.9);
+  color: #020617;
+  font-weight: 600;
+  font-size: 1.1rem;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+}
+
+.table-time {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.9);
+  font-weight: 500;
+}
+
+/* highlight active player in table mode */
+.active-table-player {
+  outline: 4px solid rgba(255,255,255,0.9);
+  box-shadow: 0 0 30px rgba(255,255,255,0.4);
+  z-index: 5;
+  transform: scale(1.02);
+}
+
+/* desktop spacing */
+.players-grid > div,
+.table-grid > div {
+  box-shadow: 0 0 20px rgba(0,0,0,0.35);
+}
+
+/* mobile tweaks */
 @media (max-width: 640px) {
+  .players-grid { gap: 0.6rem; }
+  .card { padding: 0.75rem 0.9rem; }
   .table-grid {
     border-radius: 0;
+    height: calc(100svh - 4.2rem); /* leave space for topbar */
   }
 }

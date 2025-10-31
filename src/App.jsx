@@ -5,7 +5,13 @@ import Setup from './components/Setup.jsx'
 import { msToClock } from './utils/time.js'
 
 const DEFAULT_SETTINGS = { playersCount: 2, startingLife: 40, minutesPerPlayer: 15 }
-const COLORS = ['#0ea5e9', '#f43f5e', '#22c55e', '#6366f1']
+const COLORS = [
+  '#0A84FF', // Island - blue
+  '#F44336', // Mountain - red
+  '#4CAF50', // Forest - green
+  '#9C27B0', // Swamp - purple-black
+  '#FFC107'  // Plains - white-yellow
+]
 
 function makePlayers(settings, names = [], colors = []) {
   const ms = settings.minutesPerPlayer * 60_000
@@ -119,6 +125,7 @@ export default function App() {
 
   return (
     <div className={tableMode ? 'min-h-screen p-0 m-0' : 'min-h-screen p-5 max-w-5xl mx-auto'}>
+      <h1 className="text-center text-3xl font-bold text-slate-100 mb-4">Life Clock</h1>
       <TopBar
         settings={settings}
         onReset={resetMatch}
@@ -138,30 +145,32 @@ export default function App() {
       {tableMode ? (
         <div className="table-grid mt-0">
           {players.map((p, i) => (
-            <PlayerCard
-              key={p.id}
-              player={p}
-              isActive={!p.out && i === activeIndex && isRunning}
-              onLife={onLife}
-              onRename={onRename}
-              color={p.color}
-              tableMode
-              slot={i}
-            />
+            <div key={p.id} style={{ backgroundColor: p.color, borderRadius: '1rem' }}>
+              <PlayerCard
+                player={p}
+                isActive={!p.out && i === activeIndex && isRunning}
+                onLife={onLife}
+                onRename={onRename}
+                color={p.color}
+                tableMode
+                slot={i}
+              />
+            </div>
           ))}
         </div>
       ) : (
         <>
           <div className="mt-4 grid gap-4 md:grid-cols-2 players-grid">
             {players.map((p, i) => (
-              <PlayerCard
-                key={p.id}
-                player={p}
-                isActive={!p.out && i === activeIndex && isRunning}
-                onLife={onLife}
-                onRename={onRename}
-                color={p.color}
-              />
+              <div key={p.id} style={{ backgroundColor: p.color, borderRadius: '1rem' }}>
+                <PlayerCard
+                  player={p}
+                  isActive={!p.out && i === activeIndex && isRunning}
+                  onLife={onLife}
+                  onRename={onRename}
+                  color={p.color}
+                />
+              </div>
             ))}
           </div>
 

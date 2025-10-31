@@ -1,7 +1,13 @@
 
 import React, { useState } from 'react'
 
-const COLORS = ['#0ea5e9', '#f43f5e', '#22c55e', '#6366f1']
+const COLORS = [
+  'linear-gradient(145deg, #0a0a0a 0%, #4c1d95 100%)', // Swamp
+  'linear-gradient(145deg, #0284c7 0%, #38bdf8 100%)', // Island
+  'linear-gradient(145deg, #dc2626 0%, #f87171 100%)', // Mountain
+  'linear-gradient(145deg, #16a34a 0%, #86efac 100%)', // Forest
+  'linear-gradient(145deg, #eab308 0%, #fde68a 100%)'  // Plains
+]
 
 export default function Setup({ initial, onStart }) {
   const [playersCount, setPlayersCount] = useState(initial.playersCount)
