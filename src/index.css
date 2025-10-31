@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -23,14 +22,40 @@
   }
 
   .card {
-    /* que no se pegue a los bordes */
+    padding: 0.9rem 0.9rem 0.7rem 0.9rem; /* menos padding */
+    border-radius: 1.1rem;
     margin-inline: auto;
     width: min(100%, 460px);
   }
 
-  /* botones de vida más grandes para el dedo */
-  .btn-ghost {
-    min-width: 2.8rem;
-    justify-content: center;
+  .player-name-input {
+    font-size: 1rem; /* antes 1.125rem aprox */
+  }
+
+  .life-big {
+    font-size: 2.4rem; /* antes 2.5-3rem */
+    line-height: 1;
+  }
+
+  .time-big {
+    font-size: 1.7rem;
+  }
+
+  .life-btn-row {
+    gap: 0.4rem;
+  }
+
+  .life-btn-row .btn-ghost {
+    min-width: 2.6rem;
+    padding: 0.35rem 0.5rem;
+  }
+
+  .player-status-pill {
+    font-size: 0.65rem;
+    padding: 0.35rem 0.7rem;
+  }
+
+  .players-grid {
+    gap: 0.6rem;
   }
 }

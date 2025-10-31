@@ -127,17 +127,17 @@ export default function App() {
         </div>
       )}
 
-    <div className="mt-4 grid gap-3 md:grid-cols-2">
-      {players.map((p, i) => (
-        <PlayerCard
-          key={p.id}
-          player={p}
-          isActive={!p.out && i === activeIndex && isRunning}
-          onLife={onLife}
-          onRename={onRename}
-        />
-      ))}
-    </div>
+  <div className="mt-4 grid gap-4 md:grid-cols-2 players-grid">
+    {players.map((p, i) => (
+      <PlayerCard
+        key={p.id}
+        player={p}
+        isActive={!p.out && i === activeIndex && isRunning}
+        onLife={onLife}
+        onRename={onRename}
+      />
+    ))}
+  </div>
 
       <div className="mt-6 grid gap-2">
         <div className="text-sm text-zinc-600">
