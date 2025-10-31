@@ -1,22 +1,19 @@
-
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import TopBar from './components/TopBar.jsx'
 import PlayerCard from './components/PlayerCard.jsx'
 import Setup from './components/Setup.jsx'
+import { msToClock } from './utils/time.js'
 
 const DEFAULT_SETTINGS = { playersCount: 2, startingLife: 40, minutesPerPlayer: 15 }
-const COLORS = ['#0ea5e9', '#f43f5e', '#22c55e', '#6366f1']
-const TABLE_MODE_KEY = 'life-clock:tableMode:preferred'
 
-function makePlayers(settings, names = [], colors = []) {
+function makePlayers(settings, names = []) {
   const ms = settings.minutesPerPlayer * 60_000
   return Array.from({ length: settings.playersCount }).map((_, i) => ({
     id: i + 1,
     name: names[i] ? names[i] : `Jugador ${i + 1}`,
     life: settings.startingLife,
     timeMs: ms,
-    out: false,
-    color: colors[i] ? colors[i] : COLORS[i % COLORS.length],
+    out: false
   }))
 }
 
@@ -28,18 +25,9 @@ export default function App() {
   const [inSetup, setInSetup] = useState(true)
   const [tableMode, setTableMode] = useState(false)
 
-  // load preference
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const saved = window.localStorage.getItem(TABLE_MODE_KEY)
-    if (saved === 'true') {
-      setTableMode(true)
-    }
-  }, [])
-
   const aliveCount = players.filter(p => !p.out).length
 
-  // tick timer
+  // Tick timer for active player
   useEffect(() => {
     if (!isRunning) return
     if (players[activeIndex]?.out) { nextTurn(); return }
@@ -60,7 +48,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRunning, activeIndex])
 
-  // auto-pass if current died
+  // Auto-pass if someone just ran out of time
   useEffect(() => {
     const p = players[activeIndex]
     if (p && p.out && isRunning) {
@@ -69,25 +57,10 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [players])
 
-  // auto-activate table mode on landscape IF user liked it before
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const saved = window.localStorage.getItem(TABLE_MODE_KEY)
-    if (!saved || saved !== 'true') return
-
-    function onResize() {
-      if (window.innerWidth > window.innerHeight) {
-        setTableMode(true)
-      }
-    }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-
   function startFromSetup(newSettings) {
     const cfg = { ...DEFAULT_SETTINGS, ...newSettings }
     setSettings(cfg)
-    setPlayers(makePlayers(cfg, newSettings.names || [], newSettings.colors || []))
+    setPlayers(makePlayers(cfg, newSettings.names || []))
     setActiveIndex(0)
     setIsRunning(false)
     setInSetup(false)
@@ -107,6 +80,12 @@ export default function App() {
   }
 
   function nextTurn() {
+    setPlayers(prev => {
+      const next = [...prev]
+      // no mutation needed here
+      return next
+    })
+    // find next alive player
     setActiveIndex(i => {
       let idx = i
       for (let tries = 0; tries < players.length; tries++) {
@@ -124,13 +103,7 @@ export default function App() {
   }
 
   function toggleTableMode() {
-    setTableMode(v => {
-      const next = !v
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(TABLE_MODE_KEY, next ? 'true' : 'false')
-      }
-      return next
-    })
+    setTableMode(t => !t)
   }
 
   const winner = useMemo(() => {
@@ -143,7 +116,7 @@ export default function App() {
   }
 
   return (
-    {tableMode ? <div className="min-h-screen p-0 m-0"> : <div className="min-h-screen p-5 max-w-5xl mx-auto">}
+    <div className={tableMode ? 'min-h-screen p-0 m-0' : 'min-h-screen p-5 max-w-5xl mx-auto'}>
       <TopBar
         settings={settings}
         onReset={resetMatch}
@@ -161,7 +134,7 @@ export default function App() {
       )}
 
       {tableMode ? (
-        <div className="table-grid mt-4">
+        <div className="table-grid mt-0">
           {players.map((p, i) => (
             <PlayerCard
               key={p.id}
@@ -169,36 +142,37 @@ export default function App() {
               isActive={!p.out && i === activeIndex && isRunning}
               onLife={onLife}
               onRename={onRename}
-            color={p.color}
+              color={p.color}
               tableMode
               slot={i}
             />
           ))}
         </div>
       ) : (
-        <div className="mt-4 grid gap-4 md:grid-cols-2 players-grid">
-          {players.map((p, i) => (
-            <PlayerCard
-              key={p.id}
-              player={p}
-              isActive={!p.out && i === activeIndex && isRunning}
-              onLife={onLife}
-              onRename={onRename}
-            color={p.color}
-            />
-          ))}
-        </div>
-      )}
+        <>
+          <div className="mt-4 grid gap-4 md:grid-cols-2 players-grid">
+            {players.map((p, i) => (
+              <PlayerCard
+                key={p.id}
+                player={p}
+                isActive={!p.out && i === activeIndex && isRunning}
+                onLife={onLife}
+                onRename={onRename}
+                color={p.color}
+              />
+            ))}
+          </div>
 
-      {!tableMode && (
-        <div className="mt-6 grid gap-2">
-          <div className="text-sm text-slate-200/80">
-            Turno actual: <span className="font-semibold">{players[activeIndex]?.name}</span>
+          <div className="mt-6 grid gap-2">
+            <div className="text-sm text-slate-200/80">
+              Turno actual: <span className="font-semibold">{players[activeIndex]?.name}</span>
+            </div>
+            <div className="text-xs text-slate-200/50">
+              Consejo: toca <span className="font-mono">Iniciar</span> para que comience a correr el tiempo del jugador en turno. Usa{' '}
+              <span className="font-mono">Pasar turno</span> para pausar ese reloj y activar el siguiente.
+            </div>
           </div>
-          <div className="text-xs text-slate-200/50">
-            Consejo: toca <span className="font-mono">Iniciar</span> para que comience a correr el tiempo del jugador en turno. Usa <span className="font-mono">Pasar turno</span> para pausar ese reloj y activar el siguiente.
-          </div>
-        </div>
+        </>
       )}
     </div>
   )
