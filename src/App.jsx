@@ -143,7 +143,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen p-5 max-w-5xl mx-auto">
+    {tableMode ? <div className="min-h-screen p-0 m-0"> : <div className="min-h-screen p-5 max-w-5xl mx-auto">}
       <TopBar
         settings={settings}
         onReset={resetMatch}
