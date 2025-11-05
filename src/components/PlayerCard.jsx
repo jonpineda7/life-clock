@@ -1,3 +1,4 @@
+
 import React from 'react'
 import { msToClock } from '../utils/time.js'
 
@@ -10,17 +11,13 @@ export default function PlayerCard({
   slot = 0,
   color
 }) {
-  // color que viene desde App o desde el setup
   const bg = color || player.color || '#94a3b8'
 
   if (tableMode) {
     return (
       <div
         className={`table-cell ${isActive ? 'active-table-player' : ''}`}
-        style={{
-          background: bg,
-          backgroundImage: bg, // para soportar linear-gradient
-        }}
+        style={{ background: bg, backgroundImage: bg }}
       >
         <div className="table-cell-inner">
           <div className="table-player-name">{player.name}</div>
@@ -35,18 +32,14 @@ export default function PlayerCard({
     )
   }
 
-  // vista normal
   return (
     <div
       className={`card flex flex-col gap-3 border w-full ${isActive ? 'active-card' : ''}`}
       style={{
-        // si está activo le dejamos el glow
         boxShadow: isActive ? '0 0 25px rgba(14,165,233,0.6)' : undefined,
-        // el fondo real lo ponemos adentro para no pelear con la card base
-        background: 'transparent',
+        background: 'transparent'
       }}
     >
-      {/* capa de color */}
       <div
         className="rounded-2xl w-full h-full p-3"
         style={{

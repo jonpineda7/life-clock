@@ -1,3 +1,4 @@
+
 import React from 'react'
 
 export default function TopBar({ settings, onReset, isRunning, onToggleRun, onPassTurn, onToggleTableMode, tableMode, onRandomStart }) {

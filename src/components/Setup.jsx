@@ -97,7 +97,7 @@ export default function Setup({ initial, onStart }) {
                     type="button"
                     onClick={() => updateColor(i, col)}
                     className={`w-7 h-7 rounded-full border ${colors[i] === col ? 'ring-2 ring-white/80 border-white/80' : 'border-transparent'}`}
-                    style={{ background: col }}
+                    style={{ background: col, backgroundImage: col }}
                     aria-label={`Color ${col}`}
                   />
                 ))}

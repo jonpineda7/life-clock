@@ -59,6 +59,8 @@ body {
   color: #e2e8f0;
 }
 
+
+
 /* table/board mode 2x2 */
 .table-grid {
   width: 100vw;
@@ -72,7 +74,6 @@ body {
   border-radius: 1.25rem;
 }
 
-/* each quadrant */
 .table-cell {
   width: 100%;
   height: 100%;
@@ -80,9 +81,9 @@ body {
   align-items: center;
   justify-content: center;
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.45);
 }
 
-/* inner content */
 .table-cell-inner {
   width: min(92%, 240px);
   display: flex;
@@ -92,6 +93,7 @@ body {
   justify-content: center;
   text-align: center;
   color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.45);
 }
 
 .table-player-name {
@@ -130,7 +132,6 @@ body {
   font-weight: 500;
 }
 
-/* highlight active player in table mode */
 .active-table-player {
   outline: 4px solid rgba(255,255,255,0.9);
   box-shadow: 0 0 30px rgba(255,255,255,0.4);
@@ -138,16 +139,7 @@ body {
   transform: scale(1.02);
 }
 
-/* desktop spacing */
-.players-grid > div,
-.table-grid > div {
-  box-shadow: 0 0 20px rgba(0,0,0,0.35);
-}
-
-/* mobile tweaks */
 @media (max-width: 640px) {
-  .players-grid { gap: 0.6rem; }
-  .card { padding: 0.75rem 0.9rem; }
   .table-grid {
     border-radius: 0;
     height: calc(100svh - 4.2rem); /* leave space for topbar */

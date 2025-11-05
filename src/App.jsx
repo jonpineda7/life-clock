@@ -6,16 +6,24 @@ import { msToClock } from './utils/time.js'
 
 const DEFAULT_SETTINGS = { playersCount: 2, startingLife: 40, minutesPerPlayer: 15 }
 const COLORS = [
-  '#0A84FF', // Island - blue
-  '#F44336', // Mountain - red
-  '#4CAF50', // Forest - green
-  '#9C27B0', // Swamp - purple-black
-  '#FFC107'  // Plains - white-yellow
+  'linear-gradient(145deg, #0a0a0a 0%, #4c1d95 100%)', // Swamp
+  'linear-gradient(145deg, #0284c7 0%, #38bdf8 100%)', // Island
+  'linear-gradient(145deg, #dc2626 0%, #f87171 100%)', // Mountain
+  'linear-gradient(145deg, #16a34a 0%, #86efac 100%)', // Forest
+  'linear-gradient(145deg, #eab308 0%, #fde68a 100%)'  // Plains
 ]
 
 function makePlayers(settings, names = [], colors = []) {
   const ms = settings.minutesPerPlayer * 60_000
   return Array.from({ length: settings.playersCount }).map((_, i) => ({
+    id: i + 1,
+    name: names[i] ? names[i] : `Jugador ${i + 1}`,
+    life: settings.startingLife,
+    timeMs: ms,
+    out: false,
+    color: colors[i] ? colors[i] : COLORS[i % COLORS.length],
+  }))
+}).map((_, i) => ({
     id: i + 1,
     name: names[i] ? names[i] : `Jugador ${i + 1}`,
     life: settings.startingLife,
@@ -32,6 +40,7 @@ export default function App() {
   const [isRunning, setIsRunning] = useState(false)
   const [inSetup, setInSetup] = useState(true)
   const [tableMode, setTableMode] = useState(false)
+  const wakeLockRef = useRef(null)
 
   const aliveCount = players.filter(p => !p.out).length
 
@@ -66,7 +75,16 @@ export default function App() {
   }, [players])
 
   function startFromSetup(newSettings) {
-    const cfg = { ...DEFAULT_SETTINGS, ...newSettings }
+  const cfg = { ...DEFAULT_SETTINGS, ...newSettings }
+  setSettings(cfg)
+  const created = makePlayers(cfg, newSettings.names || [], newSettings.colors || [])
+  setPlayers(created)
+  const alive = created.map((p, i) => (!p.out ? i : -1)).filter((i) => i !== -1)
+  const starter = alive[Math.floor(Math.random() * alive.length)]
+  setActiveIndex(starter)
+  setIsRunning(false)
+  setInSetup(false)
+}
     setSettings(cfg)
     setPlayers(makePlayers(cfg, newSettings.names || [], newSettings.colors || []))
     setActiveIndex(0)
@@ -87,28 +105,31 @@ export default function App() {
     setIsRunning(r => !r)
   }
 
-  function nextTurn() {
-    setPlayers(prev => {
-      const next = [...prev]
-      // no mutation needed here
-      return next
-    })
-    // find next alive player
-    setActiveIndex(i => {
-      let idx = i
-      for (let tries = 0; tries < players.length; tries++) {
-        idx = (idx + 1) % players.length
-        if (!players[idx].out) return idx
-      }
+  \1
+function chooseRandomStarter() {
+  const aliveIndexes = players
+    .map((p, idx) => (!p.out ? idx : -1))
+    .filter((idx) => idx !== -1)
+
+  if (aliveIndexes.length === 0) return
+
+  const randomIdx = aliveIndexes[Math.floor(Math.random() * aliveIndexes.length)]
+  setActiveIndex(randomIdx)
+  setIsRunning(false)
+}
       return i
     })
   }
 
   function resetMatch() {
-    setPlayers(makePlayers(settings, players.map(p => p.name), players.map(p => p.color)))
-    setActiveIndex(0)
-    setIsRunning(false)
-  }
+  setPlayers(makePlayers(
+    settings,
+    players.map(p => p.name),
+    players.map(p => p.color)
+  ))
+  setActiveIndex(0)
+  setIsRunning(false)
+}
 
   function toggleTableMode() {
     setTableMode(t => !t)
@@ -127,14 +148,15 @@ export default function App() {
     <div className={tableMode ? 'min-h-screen p-0 m-0' : 'min-h-screen p-5 max-w-5xl mx-auto'}>
       <h1 className="text-center text-3xl font-bold text-slate-100 mb-4">Life Clock</h1>
       <TopBar
-        settings={settings}
-        onReset={resetMatch}
-        isRunning={isRunning}
-        onToggleRun={toggleRun}
-        onPassTurn={nextTurn}
-        onToggleTableMode={toggleTableMode}
-        tableMode={tableMode}
-      />
+      settings={settings}
+      onReset={resetMatch}
+      isRunning={isRunning}
+      onToggleRun={toggleRun}
+      onPassTurn={nextTurn}
+      onToggleTableMode={toggleTableMode}
+      tableMode={tableMode}
+      onRandomStart={chooseRandomStarter}
+    />
 
       {winner && (
         <div className="my-4 p-4 rounded-2xl bg-emerald-500/20 text-emerald-50 font-semibold border border-emerald-500/30">
@@ -188,3 +210,26 @@ export default function App() {
     </div>
   )
 }
+
+  useEffect(() => {
+    async function enableWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen')
+        }
+      } catch (err) {
+        console.error('WakeLock error', err)
+      }
+    }
+    async function disableWakeLock() {
+      try {
+        if (wakeLockRef.current) {
+          await wakeLockRef.current.release()
+          wakeLockRef.current = null
+        }
+      } catch (err) {}
+    }
+
+    if (tableMode) enableWakeLock(); else disableWakeLock()
+    return () => { disableWakeLock() }
+  }, [tableMode])
