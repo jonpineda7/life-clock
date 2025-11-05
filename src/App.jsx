@@ -23,14 +23,6 @@ function makePlayers(settings, names = [], colors = []) {
     out: false,
     color: colors[i] ? colors[i] : COLORS[i % COLORS.length],
   }))
-}).map((_, i) => ({
-    id: i + 1,
-    name: names[i] ? names[i] : `Jugador ${i + 1}`,
-    life: settings.startingLife,
-    timeMs: ms,
-    out: false,
-    color: colors[i] ? colors[i] : COLORS[i % COLORS.length],
-  }))
 }
 
 export default function App() {
@@ -40,7 +32,6 @@ export default function App() {
   const [isRunning, setIsRunning] = useState(false)
   const [inSetup, setInSetup] = useState(true)
   const [tableMode, setTableMode] = useState(false)
-  const wakeLockRef = useRef(null)
 
   const aliveCount = players.filter(p => !p.out).length
 
@@ -74,20 +65,41 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [players])
 
+  const wakeLockRef = useRef(null)
+  useEffect(() => {
+    async function enableWakeLock() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen')
+        }
+      } catch (err) {
+        console.error('WakeLock error', err)
+      }
+    }
+    async function disableWakeLock() {
+      try {
+        if (wakeLockRef.current) {
+          await wakeLockRef.current.release()
+          wakeLockRef.current = null
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+
+    if (tableMode) enableWakeLock(); else disableWakeLock()
+    return () => { disableWakeLock() }
+  }, [tableMode])
+
   function startFromSetup(newSettings) {
-  const cfg = { ...DEFAULT_SETTINGS, ...newSettings }
-  setSettings(cfg)
-  const created = makePlayers(cfg, newSettings.names || [], newSettings.colors || [])
-  setPlayers(created)
-  const alive = created.map((p, i) => (!p.out ? i : -1)).filter((i) => i !== -1)
-  const starter = alive[Math.floor(Math.random() * alive.length)]
-  setActiveIndex(starter)
-  setIsRunning(false)
-  setInSetup(false)
-}
+    const cfg = { ...DEFAULT_SETTINGS, ...newSettings }
     setSettings(cfg)
-    setPlayers(makePlayers(cfg, newSettings.names || [], newSettings.colors || []))
-    setActiveIndex(0)
+    const created = makePlayers(cfg, newSettings.names || [], newSettings.colors || [])
+    setPlayers(created)
+    // elegir al azar quién parte
+    const alive = created.map((p, i) => (!p.out ? i : -1)).filter((i) => i !== -1)
+    const starter = alive[Math.floor(Math.random() * alive.length)]
+    setActiveIndex(starter)
     setIsRunning(false)
     setInSetup(false)
   }
@@ -105,31 +117,40 @@ export default function App() {
     setIsRunning(r => !r)
   }
 
-  \1
-function chooseRandomStarter() {
-  const aliveIndexes = players
-    .map((p, idx) => (!p.out ? idx : -1))
-    .filter((idx) => idx !== -1)
-
-  if (aliveIndexes.length === 0) return
-
-  const randomIdx = aliveIndexes[Math.floor(Math.random() * aliveIndexes.length)]
-  setActiveIndex(randomIdx)
-  setIsRunning(false)
-}
+  function nextTurn() {
+    setPlayers(prev => {
+      const next = [...prev]
+      // no mutation needed here
+      return next
+    })
+    // find next alive player
+    setActiveIndex(i => {
+      let idx = i
+      for (let tries = 0; tries < players.length; tries++) {
+        idx = (idx + 1) % players.length
+        if (!players[idx].out) return idx
+      }
       return i
     })
   }
 
+  function chooseRandomStarter() {
+    const aliveIndexes = players
+      .map((p, idx) => (!p.out ? idx : -1))
+      .filter((idx) => idx !== -1)
+
+    if (aliveIndexes.length === 0) return
+
+    const randomIdx = aliveIndexes[Math.floor(Math.random() * aliveIndexes.length)]
+    setActiveIndex(randomIdx)
+    setIsRunning(false)
+  }
+
   function resetMatch() {
-  setPlayers(makePlayers(
-    settings,
-    players.map(p => p.name),
-    players.map(p => p.color)
-  ))
-  setActiveIndex(0)
-  setIsRunning(false)
-}
+    setPlayers(makePlayers(settings, players.map(p => p.name), players.map(p => p.color)))
+    setActiveIndex(0)
+    setIsRunning(false)
+  }
 
   function toggleTableMode() {
     setTableMode(t => !t)
@@ -148,15 +169,15 @@ function chooseRandomStarter() {
     <div className={tableMode ? 'min-h-screen p-0 m-0' : 'min-h-screen p-5 max-w-5xl mx-auto'}>
       <h1 className="text-center text-3xl font-bold text-slate-100 mb-4">Life Clock</h1>
       <TopBar
-      settings={settings}
-      onReset={resetMatch}
-      isRunning={isRunning}
-      onToggleRun={toggleRun}
-      onPassTurn={nextTurn}
-      onToggleTableMode={toggleTableMode}
-      tableMode={tableMode}
-      onRandomStart={chooseRandomStarter}
-    />
+        settings={settings}
+        onReset={resetMatch}
+        isRunning={isRunning}
+        onToggleRun={toggleRun}
+        onPassTurn={nextTurn}
+        onToggleTableMode={toggleTableMode}
+        tableMode={tableMode}
+        onRandomStart={chooseRandomStarter}
+      />
 
       {winner && (
         <div className="my-4 p-4 rounded-2xl bg-emerald-500/20 text-emerald-50 font-semibold border border-emerald-500/30">
@@ -167,7 +188,7 @@ function chooseRandomStarter() {
       {tableMode ? (
         <div className="table-grid mt-0">
           {players.map((p, i) => (
-            <div key={p.id} style={{ backgroundColor: p.color, borderRadius: '1rem' }}>
+            <div key={p.id} style={{ background: p.color, backgroundImage: p.color, borderRadius: '1rem' }}>
               <PlayerCard
                 player={p}
                 isActive={!p.out && i === activeIndex && isRunning}
@@ -184,7 +205,7 @@ function chooseRandomStarter() {
         <>
           <div className="mt-4 grid gap-4 md:grid-cols-2 players-grid">
             {players.map((p, i) => (
-              <div key={p.id} style={{ backgroundColor: p.color, borderRadius: '1rem' }}>
+              <div key={p.id} style={{ background: p.color, backgroundImage: p.color, borderRadius: '1rem' }}>
                 <PlayerCard
                   player={p}
                   isActive={!p.out && i === activeIndex && isRunning}
@@ -210,26 +231,3 @@ function chooseRandomStarter() {
     </div>
   )
 }
-
-  useEffect(() => {
-    async function enableWakeLock() {
-      try {
-        if ('wakeLock' in navigator) {
-          wakeLockRef.current = await navigator.wakeLock.request('screen')
-        }
-      } catch (err) {
-        console.error('WakeLock error', err)
-      }
-    }
-    async function disableWakeLock() {
-      try {
-        if (wakeLockRef.current) {
-          await wakeLockRef.current.release()
-          wakeLockRef.current = null
-        }
-      } catch (err) {}
-    }
-
-    if (tableMode) enableWakeLock(); else disableWakeLock()
-    return () => { disableWakeLock() }
-  }, [tableMode])
